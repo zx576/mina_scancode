@@ -1,0 +1,9 @@
+.idea
+*.idea
+__pycache__/
+*.ini
+*.conf
+*.conf.save
+uwsgi_params
+*.log
+nohup.out
