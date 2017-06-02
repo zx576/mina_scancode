@@ -103,6 +103,7 @@ def checkqr(request):
         profiles = Profile.objects.filter(cookie=cookie)
 
         if len(profiles) != 1:
+            
             data = {'error': '用户错误'}
             return JsonResponse(data)
 
@@ -112,7 +113,7 @@ def checkqr(request):
         dirs = Directory.objects.filter(owner=profile).filter(name=dir_name)
 
         if len(dirs) != 1:
-            data = {'error': '无此仓库'}
+            data = {'error': '无此仓库，请重新登陆账户'}
             return JsonResponse(data)
 
         dir = dirs[0]
@@ -121,8 +122,9 @@ def checkqr(request):
         goods = Goods.objects.filter(belong=dir).filter(code=qrcode)
 
         if len(goods) != 1:
-            data = {'error': '无此商品'}
+            data = {'exist': 'none_existed'}
             return JsonResponse(data)
+
 
         good = goods[0]
 
