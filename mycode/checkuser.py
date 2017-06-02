@@ -5,6 +5,7 @@ import random
 
 
 def decrypt(*userinfo):
+    # print('')
     appid, sessionkey, encrypteddata, iv = userinfo
     pc = WXBizDataCrypt(appid, sessionkey)
 
@@ -27,7 +28,8 @@ def checkdata(code, ecrypteddata, iv):
         sessionkey = res['session_key']
         openid = res['openid']
 
-    except:
+    except Exception as e:
+        print('解码错误原因',e)
         data = {'error': '请求微信服务器错误'}
         return data
 
