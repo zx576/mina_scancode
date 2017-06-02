@@ -82,7 +82,7 @@ def verify_user(request):
 
         data['info'] = res
 
-
+        print(data)
 
         return JsonResponse(data)
 
