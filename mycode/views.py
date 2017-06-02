@@ -34,6 +34,7 @@ def verify_user(request):
 
         # 检查用户
         res = checkdata(code, encrypteddata, iv)
+        print('解码信息',res)
         # 检查不通过
         errorinfo = res.get('error', None)
         if errorinfo:
@@ -81,8 +82,7 @@ def verify_user(request):
             data['status'] = '已创建并登录'
 
         data['info'] = res
-
-        print(data)
+        print('最终返回信息',data)
 
         return JsonResponse(data)
 
