@@ -9,9 +9,15 @@ from .checkuser import checkdata
 
 import requests
 
-
+# 测试用
 def test(request):
     return JsonResponse({'data': 'info'})
+
+
+# 基本数据
+# def basic(request):
+#     pass
+
 
 
 # 处理登陆
@@ -42,6 +48,13 @@ def verify_user(request):
             query_user = Profile.objects.get(openid=openid)
             query_user.cookie = res['cookie']
             query_user.save()
+
+            # 获取用户仓库
+            dir_names = []
+            dirs = Directory.objects.filter(owner=query_user)
+            for dir in dirs:
+                dir_names.append(dir.name)
+            data['dirs'] = dir_names
             data['status'] = '已登录'
         # 新建用户
         else:
@@ -67,7 +80,9 @@ def verify_user(request):
             login(request, new_user)
             data['status'] = '已创建并登录'
 
-        data['cookie'] = res['cookie']
+        data['info'] = res
+
+
 
         return JsonResponse(data)
 
@@ -82,8 +97,9 @@ def checkqr(request):
         print(request.GET)
         qrcode = request.GET.get('code')
         cookie = request.GET.get('cookie')
-        # dir = request.GET.
+        dir_name = request.GET.get('dir')
 
+        # 验证用户
         profiles = Profile.objects.filter(cookie=cookie)
 
         if len(profiles) != 1:
@@ -92,40 +108,28 @@ def checkqr(request):
 
         profile = profiles[0]
 
-        dirs = Directory.objects.filter(owner=profile)
+        # 获取仓库
+        dirs = Directory.objects.filter(owner=profile).filter(name=dir_name)
 
-        # print(dirs)
+        if len(dirs) != 1:
+            data = {'error': '无此仓库'}
+            return JsonResponse(data)
 
-        good_count = 0
+        dir = dirs[0]
 
-        dir_info = {}
-        for dir in dirs:
-            print(dir.name, dir.owner)
-            good = Goods.objects.filter(belong=dir).filter(code=qrcode)
-            print(good)
-            if len(good) != 1:
-                continue
-            else:
-                dct = {}
-                good_count += 1
-                good = good[0]
-                # dir_info[dir.name] = {}
+        # 获取商品
+        goods = Goods.objects.filter(belong=dir).filter(code=qrcode)
 
-                dct['name'] = good.name
-                dct['count'] = good.count
-                dct['remarks'] = good.remarks
-                dct['belong'] = dir.name
+        if len(goods) != 1:
+            data = {'error': '无此商品'}
+            return JsonResponse(data)
 
-                dir_info[dir.name] = dct
-                print(dir_info)
+        good = goods[0]
 
-            data['dirs'] = dir_info
-
-        if good_count == 0:
-            data['exist'] = 'none_existed'
-
-        else:
-            data['exist'] = 'existed'
+        # 组装数据
+        data['name'] = good.name
+        data['remarks'] = good.remarks
+        data['count'] = good.count
 
         print(data)
 
@@ -141,7 +145,7 @@ def datain(request):
         data = {}
         qrcode = request.GET.get('code', None)
         name = request.GET.get('name', None)
-        remarks = request.GET.get('remark', None)
+        remarks = request.GET.get('remarks', None)
         cookie = request.GET.get('cookie')
         dir = request.GET.get('dir')
 
@@ -167,13 +171,18 @@ def datain(request):
             return JsonResponse(data)
 
         dir = dirs[0]
+        dir.freq += 1
+        dir.save()
+
 
         goods = Goods.objects.filter(belong=dir).filter(code=qrcode)
 
         if len(goods) == 1:
             good = goods[0]
-            good.name = name
-            good.remarks = remarks
+            if name:
+                good.name = name
+            if remarks:
+                good.remarks = remarks
             good.count += 1
             good.save()
             data['cur_count'] = good.count
@@ -189,6 +198,7 @@ def datain(request):
             )
             data['cur_count'] = new_good.count
             data['exist'] = 'newone'
+
 
         return JsonResponse(data)
 
@@ -221,8 +231,11 @@ def dataout(request):
             return JsonResponse(data)
 
         dir = dirs[0]
+        dir.freq += 1
+        dir.save()
 
         good = Goods.objects.filter(belong=dir).filter(code=qrcode)
+        print('dtout',good)
 
         data = {}
         if len(good) > 0:

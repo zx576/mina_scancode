@@ -28,14 +28,25 @@ class Profile(models.Model):
 
 class Directory(models.Model):
 
+
     owner = models.ForeignKey('Profile', verbose_name='拥有者')
     name = models.CharField('仓库名', max_length=100)
+
+    STATUS = (
+        (1, 'LIVE'),
+        (0, 'DEAD')
+    )
+    status = models.CharField('仓库状态', max_length=10, choices=STATUS,default=1)
+    freq = models.IntegerField('使用频率', default=0)
 
     created_time = models.DateTimeField('创建时间', auto_now_add=True)
     last_active_time = models.DateTimeField('最近操作时间', auto_now=True)
 
     def __str__(self):
         return self.name
+
+    class meta:
+        ordering = ['-freq']
 
 
 

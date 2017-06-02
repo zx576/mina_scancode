@@ -34,6 +34,7 @@ def checkdata(code, ecrypteddata, iv):
     # 解密用户数据
     try:
         v_res = decrypt(appid, sessionkey, ecrypteddata, iv)
+        print(v_res)
 
     except:
         data = {'error': '解码错误'}
