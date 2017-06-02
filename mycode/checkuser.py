@@ -38,7 +38,8 @@ def checkdata(code, ecrypteddata, iv):
         v_res = decrypt(appid, sessionkey, ecrypteddata, iv)
         # print(v_res)
 
-    except:
+    except Exception as e:
+        print(e)
         data = {'error': '解码错误'}
         return data
 
