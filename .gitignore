@@ -7,3 +7,5 @@ __pycache__/
 uwsgi_params
 *.log
 nohup.out
+*.pid
+*.save
