@@ -15,8 +15,12 @@ def decrypt(*userinfo):
 def checkdata(code, ecrypteddata, iv):
     # print(code)
     # 公众号 ID
-    appid = 'wx0d67af1e40427689'
-    secret = 'bb6e273039f6d745c75fb6931cdd20f2'
+    # appid = 'wx0d67af1e40427689'
+    # secret = 'bb6e273039f6d745c75fb6931cdd20f2'
+
+    # 编程教室官方 appid
+    appid = 'wx9c35392885dec4d9'
+    secret = '6a8841a81ad71dfac61b155cbe48c9dd'
 
     # 微信服务器链接
     url = 'https://api.weixin.qq.com/sns/jscode2session?appid={0}&secret={1}&js_code={2}&grant_type=authorization_code'
