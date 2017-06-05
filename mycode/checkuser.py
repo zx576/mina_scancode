@@ -27,9 +27,9 @@ def checkdata(code, ecrypteddata, iv):
     v_url = url.format(appid, secret, code)
     try:
         print(v_url)
-        req = requests.get(v_url, verify=False)
+        req = requests.get(v_url)
         res = req.json()
-        # print(res)
+        print(res)
         sessionkey = res['session_key']
         openid = res['openid']
 
