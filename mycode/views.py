@@ -4,6 +4,7 @@ from .models import Profile, Goods, Directory
 from django.core import serializers
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
 
 from .checkuser import checkdata
 
@@ -13,24 +14,18 @@ import requests
 def test(request):
     return JsonResponse({'data': 'info'})
 
-
-# 基本数据
-# def basic(request):
-#     pass
-
-
-
 # 处理登陆
+@csrf_exempt
 def verify_user(request):
-    if request.method == 'GET':
-
+    if request.method == 'POST':
+        # print(request.POST)
         # 初始化返回的字典
         data = {}
 
         # 获取小程序数据
-        code = request.GET.get('code')
-        encrypteddata = request.GET.get('encrypteddata')
-        iv = request.GET.get('iv')
+        code = request.POST.get('code')
+        encrypteddata = request.POST.get('encrypteddata')
+        iv = request.POST.get('iv')
 
         # 检查用户
         res = checkdata(code, encrypteddata, iv)
@@ -79,25 +74,29 @@ def verify_user(request):
             )
             new_user = authenticate(username=openid, password=openid)
             login(request, new_user)
+            data['dirs'] = ['默认']
             data['status'] = '已创建并登录'
 
         data['info'] = res
-        print('最终返回信息',data)
+        # print('最终返回信息',data)
 
         return JsonResponse(data)
 
+    data = {'error': '仅接受POST请求'}
+    return JsonResponse(data)
+
+
 
 # 索引数据库
+@csrf_exempt
 def checkqr(request):
     # pass
-    if request.method == 'GET':
+    if request.method == 'POST':
 
         data = {}
-
-        print(request.GET)
-        qrcode = request.GET.get('code')
-        cookie = request.GET.get('cookie')
-        dir_name = request.GET.get('dir')
+        qrcode = request.POST.get('code')
+        cookie = request.POST.get('cookie')
+        dir_name = request.POST.get('dir')
 
         # 验证用户
         profiles = Profile.objects.filter(cookie=cookie)
@@ -133,32 +132,26 @@ def checkqr(request):
         data['remarks'] = good.remarks
         data['count'] = good.count
 
-        print(data)
-
+        # print(data)
         return JsonResponse(data)
 
 
+    data = {'error': '仅接受POST请求'}
+    return JsonResponse(data)
+
+@csrf_exempt
 def datain(request):
     # 检查登陆情况
     # login_check = verify_user(request)
 
-    if request.method == 'GET':
+    if request.method == 'POST':
 
         data = {}
-        qrcode = request.GET.get('code', None)
-        name = request.GET.get('name', None)
-        remarks = request.GET.get('remarks', None)
-        cookie = request.GET.get('cookie')
-        dir = request.GET.get('dir')
-
-        '''
-        name:uuu
-        code:1234567
-        remark:iii
-        uin:o96Qb0RgkL8gF33132FcpgpM4WoY
-        qrcode:1234567
-
-        '''
+        qrcode = request.POST.get('code', None)
+        name = request.POST.get('name', None)
+        remarks = request.POST.get('remarks', None)
+        cookie = request.POST.get('cookie')
+        dir = request.POST.get('dir')
 
         profiles = Profile.objects.filter(cookie=cookie)
         if len(profiles) != 1:
@@ -205,19 +198,25 @@ def datain(request):
         return JsonResponse(data)
 
 
+    data = {'error': '仅接受POST请求'}
+    return JsonResponse(data)
+
+
+
 # 商品库存状态
 ENOUGH = 2
 LACK = 1
 RUNOUT = 0
 
-
+@csrf_exempt
 def dataout(request):
 
-    if request.method == 'GET':
+    if request.method == 'POST':
 
-        qrcode = request.GET.get('code', None)
-        cookie = request.GET.get('cookie')
-        dir_name = request.GET.get('dir')
+        print(request.POST)
+        qrcode = request.POST.get('code', None)
+        cookie = request.POST.get('cookie')
+        dir_name = request.POST.get('dir')
 
         profiles = Profile.objects.filter(cookie=cookie)
         if len(profiles) != 1:
@@ -226,7 +225,8 @@ def dataout(request):
 
         profile = profiles[0]
 
-        dirs = Directory.objects.filter(name=dir_name)
+        dirs = Directory.objects.filter(owner=profile).filter(name=dir_name)
+        print(dirs)
 
         if len(dirs) != 1:
             data = {'error': '无此仓库'}
@@ -263,11 +263,16 @@ def dataout(request):
         return JsonResponse(data)
 
 
+    data = {'error': '仅接受POST请求'}
+    return JsonResponse(data)
+
+
+@csrf_exempt
 def query(request):
     # user = request.user
-    if request.method == 'GET':
+    if request.method == 'POST':
         data = {}
-        cookie = request.GET.get('cookie')
+        cookie = request.POST.get('cookie')
 
         profiles = Profile.objects.filter(cookie=cookie)
         if len(profiles) != 1:
@@ -298,16 +303,21 @@ def query(request):
 
         data['dirs'] = dct_dir
 
-        print(data)
-
+        # print(data)
         return JsonResponse(data)
 
 
+    data = {'error': '仅接受POST请求'}
+    return JsonResponse(data)
+
+
+@csrf_exempt
 def builddir(request):
-    if request.method == 'GET':
+
+    if request.method == 'POST':
         data = {}
-        cookie = request.GET.get('cookie')
-        dirname = request.GET.get('dirname')
+        cookie = request.POST.get('cookie')
+        dirname = request.POST.get('dirname')
 
         profiles = Profile.objects.filter(cookie=cookie)
         if len(profiles) != 1:
@@ -316,9 +326,8 @@ def builddir(request):
 
         profile = profiles[0]
 
-        #         检查仓库是否重名
-
-        dirs = Directory.objects.filter(name=dirname)
+        # 检查仓库是否重名
+        dirs = Directory.objects.filter(owner=profile).filter(name=dirname)
 
         if len(dirs) > 0:
             data = {'error': '已有该仓库'}
@@ -332,6 +341,10 @@ def builddir(request):
         data['status'] = '已成功建立仓库' + dirname
 
         return JsonResponse(data)
+
+
+    data = {'error': '仅接受POST请求'}
+    return JsonResponse(data)
 
 
 

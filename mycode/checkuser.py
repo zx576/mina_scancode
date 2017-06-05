@@ -26,14 +26,15 @@ def checkdata(code, ecrypteddata, iv):
     url = 'https://api.weixin.qq.com/sns/jscode2session?appid={0}&secret={1}&js_code={2}&grant_type=authorization_code'
     v_url = url.format(appid, secret, code)
     try:
-        req = requests.get(v_url)
+        print(v_url)
+        req = requests.get(v_url, verify=False)
         res = req.json()
-        print(res)
+        # print(res)
         sessionkey = res['session_key']
         openid = res['openid']
 
     except Exception as e:
-        print('解码错误原因',e)
+        print('错误原因',e)
         data = {'error': '请求微信服务器错误'}
         return data
 
@@ -43,7 +44,7 @@ def checkdata(code, ecrypteddata, iv):
         # print(v_res)
 
     except Exception as e:
-        print(e)
+        print('解码错误原因',e)
         data = {'error': '解码错误'}
         return data
 
