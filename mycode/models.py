@@ -22,7 +22,8 @@ class Profile(models.Model):
     province = models.CharField('省份', max_length=100)
 
     def __str__(self):
-        return self.nickname
+        display = '用户名:{0}'.format(self.nickname)
+        return display
 
 
 
@@ -43,7 +44,8 @@ class Directory(models.Model):
     last_active_time = models.DateTimeField('最近操作时间', auto_now=True)
 
     def __str__(self):
-        return self.name
+        display = '仓库名:{0} 归属用户:{1}'.format(self.name, self.owner.nickname)
+        return display
 
     class meta:
         ordering = ['-freq']
@@ -63,13 +65,17 @@ class Goods(models.Model):
     last_active_time = models.DateTimeField('最近操作时间', auto_now=True)
 
     def __str__(self):
-        return self.name
+
+        display = '商品名:{0} 归属仓库:{1} 归属用户:{2}'
+        return display.format(self.name, self.belong.name, self.belong.owner.nickname)
+
+
 
 class Log(models.Model):
 
     owner = models.ForeignKey('Profile', verbose_name='日志所属人', default=None)
     created_time = models.DateTimeField('日志创建时间', auto_now_add=True)
-    last_active_time = models.DateTimeField('最近操作时间', auto_now=True)
+    # last_active_time = models.DateTimeField('最近操作时间', auto_now=True)
 
     # 日志类型
     TYPE = (
@@ -88,8 +94,20 @@ class Log(models.Model):
     good = models.ForeignKey('Goods', verbose_name='操作商品', blank=True, null=True)
 
     def __str__(self):
-        return self.owner.nickname
 
+        type = ''
+        display = '用户:{0} 时间:{1} 动作:{2} 操作库:{3} 操作商品:{4}'
+        for i in self.TYPE:
+            if self.type == i[0]:
+                type = i[1]
+                break
+
+        c_time = self.created_time.strftime('%Y-%m-%d %I:%M:%S')
+
+        g_name = ''
+        if self.good:
+            g_name = self.good.name
+        return display.format(self.owner.nickname, c_time, type, self.dir.name, g_name)
 
 
 

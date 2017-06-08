@@ -12,6 +12,6 @@ admin.site.register(Directory)
 class LogAdmin(admin.ModelAdmin):
     # fields = ('owner', 'created_time', 'last_active_time', 'type', 'dir', 'good')
 
-    readonly_fields = ('created_time', 'last_active_time')
+    readonly_fields = ('created_time',)
     list_filter = ('owner__nickname', 'type', 'dir__name', 'good__name')
 
