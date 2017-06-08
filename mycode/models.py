@@ -64,3 +64,34 @@ class Goods(models.Model):
 
     def __str__(self):
         return self.name
+
+class Log(models.Model):
+
+    owner = models.ForeignKey('Profile', verbose_name='日志所属人', default=None)
+    created_time = models.DateTimeField('日志创建时间', auto_now_add=True)
+    last_active_time = models.DateTimeField('最近操作时间', auto_now=True)
+
+    # 日志类型
+    TYPE = (
+        ('0', '建库'),
+        ('1', '入库'),
+        ('2', '出库'),
+        ('3', '删库'),
+        ('4', '改库')
+    )
+    type = models.CharField('日志类型', max_length=10, choices=TYPE)
+
+    # 建库
+    dir = models.ForeignKey('Directory', verbose_name='所建库', blank=True, null=True)
+
+    # 出入库
+    good = models.ForeignKey('Goods', verbose_name='操作商品', blank=True, null=True)
+
+    def __str__(self):
+        return self.owner.nickname
+
+
+
+
+
+

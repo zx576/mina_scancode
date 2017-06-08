@@ -1,3 +1,4 @@
+# coding=utf-8
 from .WXBizDataCrypt import WXBizDataCrypt
 import requests
 import string
